@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <stack>
 #include <stdexcept>
 
 #include <iostream>
@@ -12,6 +13,7 @@ class BBDocument;
 using BBNodePtr = std::shared_ptr<BBNode>;
 using BBNodeWeakPtr = std::weak_ptr<BBNode>;
 using BBNodeList = std::vector<BBNodePtr>;
+using BBNodeStack = std::stack<BBNodePtr>;
 using BBDocumentPtr = std::shared_ptr<BBDocument>;
 
 class BBNode : public std::enable_shared_from_this<BBNode>
@@ -32,6 +34,8 @@ public:
     const std::string& getNodeName() const { return _name; }
     NodeType getNodeType() const { return _nodeType; }
     BBNodePtr getParent() const { return BBNodePtr(_parent); }
+
+    const BBNodeList getChildren() const { return _children; }
 
     virtual void appendChild(BBNodePtr node)
     {
@@ -89,10 +93,7 @@ class BBDocument : public BBNode
             endingChar = end;
         }
 
-        auto textNode = std::make_shared<BBText>(std::string(begin, endingChar));
-
-        std::string name(begin, endingChar);
-        std::cout << "name: [" << name << "]" << std::endl;
+        newText(std::string(begin, endingChar));
         return endingChar;
     }    
 
@@ -151,6 +152,22 @@ public:
         node->_parent = shared_from_this();
     }
 
+    BBText& newText(const std::string& text = std::string())
+    {
+        auto textNode = std::make_shared<BBText>(text);
+        if (_stack.size() > 0)
+        {
+            _stack.top()->appendChild(textNode);
+        }
+        else
+        {
+            appendChild(textNode);
+        }
+
+        return *textNode;
+    }
+
 private:
-    BBNodeList  _stack;    
+    BBNodeList      _stack2; 
+    BBNodeStack     _stack;
 };

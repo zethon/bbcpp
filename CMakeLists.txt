@@ -9,5 +9,5 @@ if (NOT LIB_INSTALL_DIR)
 endif (NOT LIB_INSTALL_DIR)
 
 add_subdirectory(lib)
-# add_subdirectory(examples)
+add_subdirectory(examples)
 # add_subdirectory(tests)

@@ -22,9 +22,7 @@ public:
     enum NodeType
     {
         DOCUMENT,   
-        SIMPLE,     // [b]bold[/b], [code]print("hello")[/code]
-        VALUE,      // [QUOTE=Username;12345]This is a quote[/QUOTE] (mostly used by vBulletin)
-        PARAMETER,  // [QUOTE user=Bob userid=1234]This is a quote[/QUOTE] 
+        ELEMENT,    // [b]bold[/b], [QUOTE], [QUOTE=Username;1234], [QUOTE user=Bob] 
         TEXT        // plain text
     };
 
@@ -39,7 +37,8 @@ public:
 
     virtual void appendChild(BBNodePtr node)
     {
-        throw std::logic_error("Cannot append child to type BBNode");
+        _children.push_back(node);
+        node->_parent = shared_from_this();
     }
   
 protected:
@@ -50,6 +49,7 @@ protected:
 
     friend class BBText;
     friend class BBDocument;
+    friend class BBElement;
 };
 
 class BBText : public BBNode
@@ -65,6 +65,28 @@ public:
 
     virtual std::string getValue() const { return _name; }
 };
+
+class BBElement : public BBNode
+{
+public:
+    enum ElementType
+    {
+        SIMPLE,     // [b]bold[/b], [code]print("hello")[/code]
+        VALUE,      // [QUOTE=Username;12345]This is a quote[/QUOTE] (mostly used by vBulletin)
+        PARAMETER,  // [QUOTE user=Bob userid=1234]This is a quote[/QUOTE]
+    };
+
+    BBElement(const std::string& name)
+        : BBNode(BBNode::ELEMENT, name)
+    {
+        // nothing to do
+    }
+
+    virtual ~BBElement() = default;
+
+private:
+    ElementType     _elementType = BBElement::SIMPLE;    
+}
 
 class BBDocument : public BBNode
 {
@@ -112,12 +134,14 @@ public:
     template<class Iterator>
     void load(Iterator begin, Iterator end)
     {
+        std::string buffer;
         auto bUnknownNodeType = true;
         auto current = begin;
         auto nodeType = BBNode::TEXT;
 
         while (current != end)
         {
+            buffer.append(*current);
             if (bUnknownNodeType)
             {
                 if (*current == '[')
@@ -138,18 +162,17 @@ public:
                         current = parseText(current, end);
                     }
                     break;
+                    case BBNode::ELEMENT:
+                    {
+                        current = parseElement(current, end);   
+                    }
+                    break;
                     default:
                         throw std::runtime_error("Unknown node type in BBDocument::load()");
                     break;
                 }
             }
         }
-    }
-
-    virtual void appendChild(BBNodePtr node) override
-    {
-        _children.push_back(node);
-        node->_parent = shared_from_this();
     }
 
     BBText& newText(const std::string& text = std::string())
@@ -165,6 +188,21 @@ public:
         }
 
         return *textNode;
+    }
+
+    BBElement& newElement(const std::string& name)
+    {
+        auto newNode = std::make_shared<BBElement>(name);
+        if (_stack.size() > 0)
+        {
+            _stack.top()->appendChild(newNode);
+        }
+        else
+        {
+            appendChild(newNode);
+        }
+
+        return *newNode;
     }
 
 private:

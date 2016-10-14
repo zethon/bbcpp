@@ -18,11 +18,11 @@ The following are examples of the node tree built during parsing.
 
 ```
 #document
-│-- This is
+│-- @"This is"
 │-- [b]  
-│   │-- an example
+│   │-- @"an example"
 │   │-- [/b]
-│-- of some text
+│-- @"of some text"
 ```
 
 #### Example 2
@@ -33,12 +33,26 @@ The following are examples of the node tree built during parsing.
 ```
 #document
 │-- [QUOTE]  
-│   │-- This is 
+│   │-- @"This is " 
 │   │-- [b]
-|   |   |-- important
+|   |   |-- @"important"
 |   |   |-- [/b]
-│   │-- news!
+│   │-- @"news!"
 │   │-- [/QUOTE]
-│-- \n\nIndeed it is!
+│-- @"\n\nIndeed it is!"
 ```
 
+#### Example 3
+> `[QUOTE user=Joe userid=1 postid=1234]This is another quote![/QUOTE]`<br/><br/>
+> `I'm quoting you!`
+
+```
+#document
+│-- [QUOTE]
+|   |-- {user=Joe}
+|   |-- {userid=1}
+|   |-- {postid=1234} 
+│   │-- @"This is another quote!"
+│   │-- [/QUOTE]
+│-- @"\n\nI'm quoting you!"
+```

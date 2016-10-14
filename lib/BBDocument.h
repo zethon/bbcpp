@@ -86,7 +86,7 @@ public:
 
 private:
     ElementType     _elementType = BBElement::SIMPLE;    
-}
+};
 
 class BBDocument : public BBNode
 {
@@ -117,7 +117,15 @@ class BBDocument : public BBNode
 
         newText(std::string(begin, endingChar));
         return endingChar;
-    }    
+    }
+
+    template <typename citerator>
+    citerator parseElement(citerator begin, citerator end)
+    {
+        auto endingchar = begin;
+
+        return endingchar;
+    }
 
 public: 
     static BBDocumentPtr create()
@@ -141,7 +149,7 @@ public:
 
         while (current != end)
         {
-            buffer.append(*current);
+//            buffer.append(*current);
             if (bUnknownNodeType)
             {
                 if (*current == '[')
@@ -164,7 +172,7 @@ public:
                     break;
                     case BBNode::ELEMENT:
                     {
-                        current = parseElement(current, end);   
+                        current = parseElement(current, end);
                     }
                     break;
                     default:
@@ -206,6 +214,30 @@ public:
     }
 
 private:
-    BBNodeList      _stack2; 
     BBNodeStack     _stack;
 };
+
+std::string nodeTypeToString(BBNode::NodeType type)
+{
+    std::string retval = "Unknown";
+
+    switch (type)
+    {
+        case BBNode::NodeType::DOCUMENT:
+            retval = "Document";
+        break;
+
+        case BBNode::NodeType::ELEMENT:
+            retval = "Element";
+        break;
+
+        case BBNode::NodeType::TEXT:
+            retval = "Text";
+        break;
+
+        default:
+        break;
+    }
+
+    return retval;
+}

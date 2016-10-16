@@ -122,7 +122,21 @@ class BBDocument : public BBNode
     template <typename citerator>
     citerator parseElement(citerator begin, citerator end)
     {
+        // [XYZ
+        bool parsingName = true;
+
+        auto nameStart = end;
+        auto nameEnd = end;
+
         auto endingchar = begin;
+
+        for (auto it = begin; it != end; it++)
+        {
+            if (std::isalpha(*it) && nameStart == end)
+            {
+                nameStart = it;
+            }
+        }
 
         return endingchar;
     }
@@ -149,7 +163,6 @@ public:
 
         while (current != end)
         {
-//            buffer.append(*current);
             if (bUnknownNodeType)
             {
                 if (*current == '[')

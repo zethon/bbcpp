@@ -11,7 +11,23 @@ This library primarily focuses on parsing the BBCode into a tree data structure 
     auto doc = BBDocument::create();
     doc->load("This is [b]an example[/b] of some text.");
 
+## Simple Elements
+
+#### Examples:
+    [B] - Bold text
+    [I] - Italicized text
+    [QUOTE] - Blockquote text (without specifiers as discussed below)
+
 ## Special Tags
+
+### `QUOTE`
+
+The **bbcpp** parser will accept three different formats for the `QUOTE` tag:
+
+1. `[QUOTE user=Username postid=1234]`: A key-value pair of values. In theory they are space delimited unless quoted. (Used with phpBB)
+1. `[QUOTE="username, post: 1799684, member: 11733"]`: Another key-value pair format except the first argument is assumed to be the username. (Used with XenForo)   
+1. `[QUOTE=Username;1234]`: `Username` is the name of the user being quoted and `1234` is the postid. (Used with vBulletin)
+
 
 ### `STYLE`
 
@@ -22,14 +38,6 @@ This library primarily focuses on parsing the BBCode into a tree data structure 
 ### `IMG`
 
 ### `URL`
-
-### `QUOTE`
-
-The **bbcpp** parser will accept three different formats for the `QUOTE` tag:
-
-1. `[QUOTE user=Username postid=1234]`: A key-value pair of values. In theory they are space delimited unless quoted. (Used with phpBB)
-1. `[QUOTE="username, post: 1799684, member: 11733"]`: Another key-value pair format except the first argument is assumed to be the username. (Used with XenForo)   
-1. `[QUOTE=Username;1234]`: `Username` is the name of the user being quoted and `1234` is the postid. (Used with vBulletin)
 
 ## BBNode Tree
 

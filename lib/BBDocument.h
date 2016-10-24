@@ -122,8 +122,11 @@ class BBDocument : public BBNode
     template <typename citerator>
     citerator parseElement(citerator begin, citerator end)
     {
-        // [XYZ
-        bool parsingName = true;
+        if (*std::next(begin) == '/')
+        {
+            std::cout << "end tag!!" << std::endl;
+            begin = std::next(begin);
+        }
 
         auto nameStart = end;
         auto nameEnd = end;
@@ -136,6 +139,11 @@ class BBDocument : public BBNode
             {
                 nameStart = it;
             }
+        }
+
+        if (nameStart != nameEnd)
+        {
+            newElement(std::string(nameStart, nameEnd));
         }
 
         return endingchar;

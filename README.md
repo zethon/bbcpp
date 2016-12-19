@@ -18,6 +18,20 @@ This library primarily focuses on parsing the BBCode into a tree data structure 
     [I] - Italicized text
     [QUOTE] - Blockquote text (without specifiers as discussed below)
 
+## Value Elements
+
+#### Examples
+    [COLOR="green"]
+    [FONT="Arial Narrow"]
+    [SIZE="5"]
+    [EMAIL="billgates@microsoft.com"]
+    [QUOTE=Username;1234]
+
+## Key/Value Elements
+
+#### Examples
+    [QUOTE user=Username postid=1234]
+
 ## Special Tags
 
 ### `QUOTE`
@@ -28,8 +42,7 @@ The **bbcpp** parser will accept three different formats for the `QUOTE` tag:
 1. `[QUOTE="username, post: 1799684, member: 11733"]`: Another key-value pair format except the first argument is assumed to be the username. (Used with XenForo)   
 1. `[QUOTE=Username;1234]`: `Username` is the name of the user being quoted and `1234` is the postid. (Used with vBulletin)
 
-
-### `STYLE`
+### `FONT`
 
 ### `COLOR`
 

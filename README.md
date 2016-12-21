@@ -25,16 +25,8 @@ This library primarily focuses on parsing the BBCode into a tree data structure 
     [FONT="Arial Narrow"]
     [SIZE="5"]
     [EMAIL="billgates@microsoft.com"]
-    [QUOTE=Username;1234]
 
-## Key/Value Elements
-
-#### Examples
-    [QUOTE user=Username postid=1234]
-
-## Special Tags
-
-### `QUOTE`
+## The `QUOTE` Element
 
 The **bbcpp** parser will accept three different formats for the `QUOTE` tag:
 

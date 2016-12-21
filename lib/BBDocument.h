@@ -311,10 +311,10 @@ public:
         }
     }
 
-    BBText& newText(const std::string& text = std::string());
-
 private:
     BBNodeStack     _stack;
+
+    BBText& newText(const std::string& text = std::string());
     BBElement& newElement(const std::string& name);
     BBElement& newClosingElement(const std::string& name);
 };

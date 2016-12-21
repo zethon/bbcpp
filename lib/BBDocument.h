@@ -8,9 +8,14 @@
 #include <iostream>
 
 class BBNode;
+class BBText;
+class BBElement;
 class BBDocument;
 
 using BBNodePtr = std::shared_ptr<BBNode>;
+using BBTextPtr = std::shared_ptr<BBText>;
+using BBElementPtr = std::shared_ptr<BBElement>;
+
 using BBNodeWeakPtr = std::weak_ptr<BBNode>;
 using BBNodeList = std::vector<BBNodePtr>;
 using BBNodeStack = std::stack<BBNodePtr>;
@@ -18,6 +23,50 @@ using BBDocumentPtr = std::shared_ptr<BBDocument>;
 
 class BBNode : public std::enable_shared_from_this<BBNode>
 {
+    template<typename NewTypePtrT>
+    NewTypePtrT cast(BBNodePtr node, bool bThrowOnFail)
+    {
+        if (node == nullptr && !bThrowOnFail)
+        {
+            return NewTypePtrT();
+        }
+        else if (node == nullptr)
+        {
+            throw std::invalid_argument("Cannot downcast BBNode, object is null");
+        }
+
+        NewTypePtrT newobj = std::dynamic_pointer_cast<typename NewTypePtrT::element_type, BBNode>(node);
+
+        if (newobj == nullptr && bThrowOnFail)
+        {
+            throw std::invalid_argument("Cannot downcast, object is not correct type");
+        }
+
+        return newobj;
+    }   
+
+    template<typename NewTypePtrT>
+    NewTypePtrT cast(BBNodePtr node, bool bThrowOnFail) const
+    {
+        if (node == nullptr && !bThrowOnFail)
+        {
+            return NewTypePtrT();
+        }
+        else if (node == nullptr)
+        {
+            throw std::invalid_argument("Cannot downcast, BBNode object is null");
+        }
+
+        NewTypePtrT newobj = std::dynamic_pointer_cast<typename NewTypePtrT::element_type, BBNode>(node);
+
+        if (newobj == nullptr && bThrowOnFail)
+        {
+            throw std::invalid_argument("Cannot downcast, object is not correct type");
+        }
+
+        return newobj;
+    }      
+        
 public:
     enum NodeType
     {
@@ -40,6 +89,18 @@ public:
         _children.push_back(node);
         node->_parent = shared_from_this();
     }
+
+    template<typename NewTypePtrT>
+	NewTypePtrT downCast(bool bThrowOnFail = true)
+	{
+		return cast<NewTypePtrT>(shared_from_this(), bThrowOnFail);
+	}
+
+    template<typename NewTypePtrT>
+	NewTypePtrT downCast(bool bThrowOnFail = true) const
+	{
+		return cast<NewTypePtrT>(shared_from_this(), bThrowOnFail);
+	}
   
 protected:
     std::string     _name;
@@ -63,7 +124,7 @@ public:
 
     virtual ~BBText() = default;
 
-    virtual std::string getValue() const { return _name; }
+    virtual std::string getText() const { return _name; }
 };
 
 class BBElement : public BBNode
@@ -74,15 +135,19 @@ public:
         SIMPLE,     // [b]bold[/b], [code]print("hello")[/code]
         VALUE,      // [QUOTE=Username;12345]This is a quote[/QUOTE] (mostly used by vBulletin)
         PARAMETER,  // [QUOTE user=Bob userid=1234]This is a quote[/QUOTE]
+        CLOSING     // [/b], [/code]
     };
 
-    BBElement(const std::string& name)
-        : BBNode(BBNode::ELEMENT, name)
+    BBElement(const std::string& name, ElementType et = BBElement::SIMPLE)
+        : BBNode(BBNode::ELEMENT, name),
+          _elementType(et)
     {
         // nothing to do
     }
 
     virtual ~BBElement() = default;
+
+    const ElementType getElementType() const { return _elementType; }
 
 private:
     ElementType     _elementType = BBElement::SIMPLE;    
@@ -119,34 +184,57 @@ class BBDocument : public BBNode
         return endingChar;
     }
 
+    // template <typename citerator>
+    // citerator parseValue(citerator begin, citerator end)
+    // {
+
+    // }
+
     template <typename citerator>
     citerator parseElement(citerator begin, citerator end)
     {
-        if (*std::next(begin) == '/')
-        {
-            std::cout << "end tag!!" << std::endl;
-            begin = std::next(begin);
-        }
-
-        auto nameStart = end;
+        bool closingTag = false;
+        auto nameStart = std::next(begin);
         auto nameEnd = end;
 
-        auto endingchar = begin;
-
-        for (auto it = begin; it != end; it++)
+        if (*nameStart == '/')
         {
-            if (std::isalpha(*it) && nameStart == end)
+            closingTag = true;
+            nameStart = std::next(nameStart);
+        }
+
+        for (auto it = nameStart; it != end; it++)
+        {
+            if (*it == ']' || it == end)
             {
-                nameStart = it;
+                nameEnd = it;
+                break;
+            }
+            else if (*it == '=')
+            {
+                // it = parseValue(it, end);
             }
         }
 
-        if (nameStart != nameEnd)
+        // looks like we have a valid ELEMENT
+        if (nameEnd != end 
+            && nameStart != nameEnd 
+            && *nameEnd == ']'
+            && nameEnd != std::next(begin))
         {
-            newElement(std::string(nameStart, nameEnd));
+            if (closingTag)
+            {
+                newClosingElement(std::string(nameStart, nameEnd));
+            }
+            else
+            {
+                newElement(std::string(nameStart, nameEnd));
+            }
+
+            return std::next(nameEnd);
         }
 
-        return endingchar;
+        return begin;
     }
 
 public: 
@@ -169,12 +257,16 @@ public:
         auto current = begin;
         auto nodeType = BBNode::TEXT;
 
+        Iterator temp;
+
         while (current != end)
         {
             if (bUnknownNodeType)
             {
                 if (*current == '[')
                 {
+                    nodeType = BBNode::ELEMENT;
+                    bUnknownNodeType = false;
                 }
                 else
                 {
@@ -182,60 +274,49 @@ public:
                     bUnknownNodeType = false;
                 }
             }
-            else
+            
+            if (!bUnknownNodeType)
             {
                 switch (nodeType)
                 {
-                    case BBNode::TEXT:
-                    {
-                        current = parseText(current, end);
-                    }
-                    break;
-                    case BBNode::ELEMENT:
-                    {
-                        current = parseElement(current, end);
-                    }
-                    break;
                     default:
                         throw std::runtime_error("Unknown node type in BBDocument::load()");
                     break;
+
+                    case BBNode::TEXT:
+                    {
+                        current = parseText(current, end);
+                        bUnknownNodeType = true;
+                    }
+                    break;
+
+                    case BBNode::ELEMENT:
+                    {
+                        temp  = parseElement(current, end);
+                        if (temp == current)
+                        {
+                            // nothing was parsed, treat as text
+                            nodeType = BBNode::TEXT;
+                            bUnknownNodeType = false;
+                        }
+                        else
+                        {
+                            current = temp;
+                            bUnknownNodeType = true;
+                        }
+                    }
+                    break;                    
                 }
             }
         }
     }
 
-    BBText& newText(const std::string& text = std::string())
-    {
-        auto textNode = std::make_shared<BBText>(text);
-        if (_stack.size() > 0)
-        {
-            _stack.top()->appendChild(textNode);
-        }
-        else
-        {
-            appendChild(textNode);
-        }
-
-        return *textNode;
-    }
-
-    BBElement& newElement(const std::string& name)
-    {
-        auto newNode = std::make_shared<BBElement>(name);
-        if (_stack.size() > 0)
-        {
-            _stack.top()->appendChild(newNode);
-        }
-        else
-        {
-            appendChild(newNode);
-        }
-
-        return *newNode;
-    }
+    BBText& newText(const std::string& text = std::string());
 
 private:
     BBNodeStack     _stack;
+    BBElement& newElement(const std::string& name);
+    BBElement& newClosingElement(const std::string& name);
 };
 
 std::string nodeTypeToString(BBNode::NodeType type)

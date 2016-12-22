@@ -6,8 +6,34 @@ BBNode::BBNode(NodeType nodeType, const std::string& name)
     // nothing to do
 }
 
-BBText &BBDocument::newText(const std::__1::string &text)
+BBText &BBDocument::newText(const std::string &text)
 {
+    // first try to append this text to the item on top of the stack
+    // iff that is a BBText object, if not, then see if the last element
+    // pushed to BBDocument is a text item, and if so append this to that
+    // text
+    if (_stack.size() > 0 && _stack.top()->getChildren().size() > 0)
+    {
+        auto textnode = _stack.top()->getChildren().at(0)->downCast<BBTextPtr>(false);
+        if (textnode)
+        {
+            textnode->append(text);
+            return *textnode;
+        }
+    }
+    else if (_children.size() > 0)
+    {
+        auto textnode = _children.back()->downCast<BBTextPtr>(false);
+        if (textnode)
+        {
+            textnode->append(text);
+            return *textnode;
+        }
+    }
+
+    // ok, there was no previous text element so we wil either add this text
+    // element as a child of the top item OR we'll add it to the BBDocucment
+    // object
     auto textNode = std::make_shared<BBText>(text);
     if (_stack.size() > 0)
     {

@@ -4,7 +4,7 @@
 #include <vector>
 #include <stack>
 #include <stdexcept>
-
+#include <sstream>
 #include <iostream>
 
 class BBNode;
@@ -124,7 +124,12 @@ public:
 
     virtual ~BBText() = default;
 
-    virtual std::string getText() const { return _name; }
+    virtual const std::string getText() const { return _name; }
+
+    void append(const std::string& text)
+    {
+        _name.append(text);
+    }
 };
 
 class BBElement : public BBNode
@@ -158,11 +163,11 @@ class BBDocument : public BBNode
     BBDocument() 
         : BBNode(DOCUMENT, "#document")
     {
-        // nothing to do        
+        // nothing to do
     }
 
 	template <typename citerator>
-	citerator parseText(citerator begin, citerator end)
+    citerator parseText(citerator begin, citerator end)
     {
         auto endingChar = begin;
 
@@ -181,60 +186,70 @@ class BBDocument : public BBNode
         }
 
         newText(std::string(begin, endingChar));
+
         return endingChar;
     }
 
-    // template <typename citerator>
-    // citerator parseValue(citerator begin, citerator end)
-    // {
+     template <typename citerator>
+     citerator parseElementName(citerator begin, citerator end, std::string& buf)
+     {
+         auto start = begin;
+         std::stringstream str;
 
-    // }
+         for (auto it = start; it != end; it++)
+         {
+             // TODO: alphanumeric names only?
+            if (std::isalnum(*it) != 0)
+            {
+                str << *it;
+            }
+            else
+            {
+                buf.assign(str.str());
+                return it;
+            }
+         }
+
+         return start;
+     }
 
     template <typename citerator>
     citerator parseElement(citerator begin, citerator end)
     {
         bool closingTag = false;
-        auto nameStart = std::next(begin);
-        auto nameEnd = end;
 
+        // the first non-[ and non-/ character
+        auto nameStart = std::next(begin);
+
+        std::string elementName;
+
+        // this might be a closing tag so mark it
         if (*nameStart == '/')
         {
             closingTag = true;
             nameStart = std::next(nameStart);
         }
 
-        for (auto it = nameStart; it != end; it++)
+        // nameEnd will point
+        auto nameEnd = parseElementName(nameStart, end, elementName);
+
+        // no valid name was found, so bail out
+        if (elementName.empty())
         {
-            if (*it == ']' || it == end)
-            {
-                nameEnd = it;
-                break;
-            }
-            else if (*it == '=')
-            {
-                // it = parseValue(it, end);
-            }
+            newText(std::string{*begin});
+            return nameEnd;
         }
 
-        // looks like we have a valid ELEMENT
-        if (nameEnd != end 
-            && nameStart != nameEnd 
-            && *nameEnd == ']'
-            && nameEnd != std::next(begin))
+        if (closingTag)
         {
-            if (closingTag)
-            {
-                newClosingElement(std::string(nameStart, nameEnd));
-            }
-            else
-            {
-                newElement(std::string(nameStart, nameEnd));
-            }
-
-            return std::next(nameEnd);
+            newClosingElement(elementName);
+        }
+        else
+        {
+            newElement(elementName);
         }
 
-        return begin;
+        return std::next(nameEnd);
     }
 
 public: 

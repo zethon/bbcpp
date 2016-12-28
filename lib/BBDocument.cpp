@@ -1,5 +1,8 @@
 #include "BBDocument.h"
 
+namespace bbcpp
+{
+
 BBNode::BBNode(NodeType nodeType, const std::string& name)
     : _name(name), _nodeType(nodeType)
 {
@@ -80,3 +83,5 @@ BBElement& BBDocument::newClosingElement(const std::string& name)
 
     return *newNode;
 }
+
+} // namespace

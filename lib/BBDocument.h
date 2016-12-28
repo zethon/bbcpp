@@ -7,6 +7,9 @@
 #include <sstream>
 #include <iostream>
 
+namespace bbcpp
+{
+
 class BBNode;
 class BBText;
 class BBElement;
@@ -358,3 +361,62 @@ std::string nodeTypeToString(BBNode::NodeType type)
 
     return retval;
 }
+
+// Helper Functions
+std::string getIndent(const uint indent)
+{
+    std::stringstream output;
+
+    for (auto i = 0; i < indent; i++)
+    {
+        output << "|   ";
+    }
+
+    output << "|-- ";
+    return output.str();
+}
+
+void printChildren(const BBNode& parent, uint indent)
+{
+    for (const auto node : parent.getChildren())
+    {
+        switch (node->getNodeType())
+        {
+            default:
+            break;
+
+            case BBNode::ELEMENT:
+            {
+                const auto element = node->downCast<BBElementPtr>();
+                std::cout
+                    << getIndent(indent)
+                    << "["
+                    << (element->getElementType() == BBElement::CLOSING ? "/" : "")
+                    << element->getNodeName() << "]"
+                    << std::endl;
+            }
+            break;
+
+             case BBNode::TEXT:
+             {
+                const auto textnode = node->downCast<BBTextPtr>();
+                std::cout << getIndent(indent)
+                    << "@\"" << textnode->getText() << "\""
+                    << std::endl;
+             }
+             break;
+        }
+
+        printChildren(*node, indent+1);
+    }
+}
+
+void printDocument(const BBDocument& doc)
+{
+    std::cout << "#document" << std::endl;
+
+    auto indent = 0u;
+    printChildren(doc, indent);
+}
+
+} // namespace

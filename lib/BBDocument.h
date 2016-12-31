@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 namespace bbcpp
 {
@@ -23,6 +24,8 @@ using BBNodeWeakPtr = std::weak_ptr<BBNode>;
 using BBNodeList = std::vector<BBNodePtr>;
 using BBNodeStack = std::stack<BBNodePtr>;
 using BBDocumentPtr = std::shared_ptr<BBDocument>;
+
+using ParameterMap = std::map<std::string, std::string>;
 
 class BBNode : public std::enable_shared_from_this<BBNode>
 {
@@ -75,7 +78,8 @@ public:
     {
         DOCUMENT,   
         ELEMENT,    // [b]bold[/b], [QUOTE], [QUOTE=Username;1234], [QUOTE user=Bob] 
-        TEXT        // plain text
+        TEXT,       // plain text
+        ATTRIBUTE
     };
 
     BBNode(NodeType nodeType, const std::string& name);
@@ -85,7 +89,7 @@ public:
     NodeType getNodeType() const { return _nodeType; }
     BBNodePtr getParent() const { return BBNodePtr(_parent); }
 
-    const BBNodeList getChildren() const { return _children; }
+    const BBNodeList& getChildren() const { return _children; }
 
     virtual void appendChild(BBNodePtr node)
     {
@@ -157,8 +161,26 @@ public:
 
     const ElementType getElementType() const { return _elementType; }
 
+    auto setOrAddParameter(const std::string& key, const std::string& value, bool addIfNotExists = true)
+    {
+        _parameters.insert({key,value});
+    }
+
+    std::string getParameter(const std::string& key, bool bDoThrow = true)
+    {
+        if (_parameters.find(key) == _parameters.end() && bDoThrow)
+        {
+            throw std::invalid_argument("Undefine attribute '" + key + "'");
+        }
+
+        return _parameters.at(key);
+    }
+
+    const ParameterMap& getParameters() const { return _parameters; }
+
 private:
-    ElementType     _elementType = BBElement::SIMPLE;    
+    ElementType         _elementType = BBElement::SIMPLE;
+    ParameterMap      _parameters;
 };
 
 class BBDocument : public BBNode
@@ -216,6 +238,137 @@ class BBDocument : public BBNode
          return start;
      }
 
+     template <typename citerator>
+     citerator parseValue(citerator begin, citerator end, std::string& value)
+     {
+         auto start = begin;
+         while (std::isspace(*start) && start != end)
+         {
+             start++;
+         }
+
+         if (start == end)
+         {
+             // we got to the end and there was nothing but spaces
+             // so return our starting point so the caller can create
+             // a text node with those spaces
+             return end;
+         }
+
+         bool closedParams = false;
+         std::stringstream temp;
+
+         // TODO: need to handle spaces after the key name and before
+         // the equal sign (ie. "[style color  =red]")
+         for (auto it = start; it != end; it++)
+         {
+             if (std::isalnum(*it))
+             {
+                 temp << *it;
+             }
+             else if (*it == ']')
+             {
+                 value.assign(temp.str());
+                 return it;
+             }
+             else
+             {
+                 // some invalid character, so return the point where
+                 // we stopped parsing
+                 return it;
+             }
+         }
+
+         // if we get here then we're at the end, so we return the starting
+         // point so the callerd can create a text node
+         return end;
+     }
+
+    template <typename citerator>
+    citerator parseKey(citerator begin, citerator end, std::string& keyname)
+    {
+        auto start = begin;
+        while (std::isspace(*start) && start != end)
+        {
+            start++;
+        }
+
+        if (start == end)
+        {
+            // we got to the end and there was nothing but spaces
+            // so return our end point so the caller can create
+            // a text node with those spaces
+            return start;
+        }
+
+        std::stringstream temp;
+
+        // TODO: need to handle spaces after the key name and before
+        // the equal sign (ie. "[style color  =red]")
+        for (auto it = start; it != end; it++)
+        {
+            if (std::isalnum(*it))
+            {
+                temp << *it;
+            }
+            else if (*it == '=')
+            {
+                keyname.assign(temp.str());
+                return it;
+            }
+            else
+            {
+                // some invalid character, so return the point where
+                // we stopped parsing
+                return it;
+            }
+        }
+
+        // if we get here then we're at the end, so we return the starting
+        // point so the callerd can create a text node
+        return end;
+    }
+
+    template <typename citerator>
+    citerator parseKeyValuePairs(citerator begin, citerator end, ParameterMap& pairs)
+    {
+        auto current = begin;
+        std::string tempKey;
+        std::string tempVal;
+
+        while (current != end)
+        {
+            current = parseKey(current, end, tempKey);
+            if (tempKey.empty())
+            {
+                pairs.clear();
+                return current;
+            }
+
+            if (*current != '=')
+            {
+                throw std::logic_error("WTF?!?!");
+            }
+
+            current = std::next(current);
+            current = parseValue(current, end, tempVal);
+
+            if (tempKey.empty() || tempVal.empty())
+            {
+                pairs.clear();
+                return current;
+            }
+
+            pairs.insert(std::make_pair(tempKey, tempVal));
+            if (*current == ']')
+            {
+                return current;
+            }
+        }
+
+        return end;
+    }
+
     template <typename citerator>
     citerator parseElement(citerator begin, citerator end)
     {
@@ -240,6 +393,45 @@ class BBDocument : public BBNode
         if (elementName.empty())
         {
             newText(std::string{*begin});
+            return nameEnd;
+        }
+        else if (nameEnd == end)
+        {
+            newText(std::string(begin,end));
+            return end;
+        }
+
+        if (*nameEnd == ']')
+        {
+            // end of element
+        }
+        else if (*nameEnd == '=')
+        {
+            // possibly a QUOTE value element
+        }
+        else if (*nameEnd == ' ')
+        {
+            // possibly key-value pairs of a QUOTE
+            ParameterMap pairs;
+
+            auto kvEnd = parseKeyValuePairs(nameEnd, end, pairs);
+            if (pairs.size() == 0)
+            {
+                newText(std::string(begin, kvEnd));
+                return kvEnd;
+            }
+            else
+            {
+                newKeyValueElement(elementName, pairs);
+                // TODO: add 'pairs'
+                return std::next(kvEnd);
+            }
+        }
+        else
+        {
+            // some invalid char proceeded the element name, so it's not actually a
+            // valid element, so create it as text and move on
+            newText(std::string(begin,nameEnd));
             return nameEnd;
         }
 
@@ -335,6 +527,7 @@ private:
     BBText& newText(const std::string& text = std::string());
     BBElement& newElement(const std::string& name);
     BBElement& newClosingElement(const std::string& name);
+    BBElement& newKeyValueElement(const std::string& name, const ParameterMap& pairs);
 };
 
 std::string nodeTypeToString(BBNode::NodeType type)
@@ -363,7 +556,7 @@ std::string nodeTypeToString(BBNode::NodeType type)
 }
 
 // Helper Functions
-std::string getIndent(const uint indent)
+std::string getIndentString(const uint indent)
 {
     std::stringstream output;
 
@@ -374,6 +567,17 @@ std::string getIndent(const uint indent)
 
     output << "|-- ";
     return output.str();
+}
+
+void printParameters(const ParameterMap& pairs, const uint indent)
+{
+    for (const auto& kv : pairs)
+    {
+        std::cout
+            << getIndentString(indent+1)
+            << "{" << kv.first << "=" << kv.second << "}"
+            << std::endl;
+    }
 }
 
 void printChildren(const BBNode& parent, uint indent)
@@ -389,18 +593,23 @@ void printChildren(const BBNode& parent, uint indent)
             {
                 const auto element = node->downCast<BBElementPtr>();
                 std::cout
-                    << getIndent(indent)
+                    << getIndentString(indent)
                     << "["
                     << (element->getElementType() == BBElement::CLOSING ? "/" : "")
                     << element->getNodeName() << "]"
                     << std::endl;
+
+                if (element->getElementType() == BBElement::PARAMETER)
+                {
+                    printParameters(element->getParameters(), indent);
+                }
             }
             break;
 
              case BBNode::TEXT:
              {
                 const auto textnode = node->downCast<BBTextPtr>();
-                std::cout << getIndent(indent)
+                std::cout << getIndentString(indent)
                     << "@\"" << textnode->getText() << "\""
                     << std::endl;
              }

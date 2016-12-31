@@ -11,6 +11,8 @@ BBNode::BBNode(NodeType nodeType, const std::string& name)
 
 BBText &BBDocument::newText(const std::string &text)
 {
+    std::cout << "New TEXT Node: (" << text << ")" << std::endl;
+
     // first try to append this text to the item on top of the stack
     // iff that is a BBText object, if not, then see if the last element
     // pushed to BBDocument is a text item, and if so append this to that
@@ -53,6 +55,8 @@ BBText &BBDocument::newText(const std::string &text)
 
 BBElement& BBDocument::newElement(const std::string &name)
 {
+    std::cout << "New ELEMENT Node: (" << name << ")" << std::endl;
+
     auto newNode = std::make_shared<BBElement>(name);
     if (_stack.size() > 0)
     {
@@ -70,6 +74,8 @@ BBElement& BBDocument::newElement(const std::string &name)
 
 BBElement& BBDocument::newClosingElement(const std::string& name)
 {
+    std::cout << "New CLOSING ELEMENT Node: (" << name << ")" << std::endl;
+
     auto newNode = std::make_shared<BBElement>(name, BBElement::CLOSING);
     if (_stack.size() > 0)
     {
@@ -82,6 +88,31 @@ BBElement& BBDocument::newClosingElement(const std::string& name)
     }
 
     return *newNode;
+}
+
+BBElement& BBDocument::newKeyValueElement(const std::string& name, const ParameterMap& pairs)
+{
+    std::cout << "New KEYVALUE ELEMENT Node: (" << name << ")" << std::endl;
+
+    auto newNode = std::make_shared<BBElement>(name, BBElement::PARAMETER);
+    if (_stack.size() > 0)
+    {
+        _stack.top()->appendChild(newNode);
+    }
+    else
+    {
+        // add this node to the document-node if needed
+        appendChild(newNode);
+    }
+
+    for (const auto& kv : pairs)
+    {
+        newNode->setOrAddParameter(kv.first, kv.second);
+    }
+
+    _stack.push(newNode);
+    return *newNode;
+
 }
 
 } // namespace

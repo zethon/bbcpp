@@ -161,7 +161,7 @@ public:
 
     const ElementType getElementType() const { return _elementType; }
 
-    auto setOrAddParameter(const std::string& key, const std::string& value, bool addIfNotExists = true)
+    void setOrAddParameter(const std::string& key, const std::string& value, bool addIfNotExists = true)
     {
         _parameters.insert({key,value});
     }
@@ -270,6 +270,11 @@ class BBDocument : public BBNode
              {
                  value.assign(temp.str());
                  return it;
+             }
+             else if(*it == '#')
+             {
+                 //is color
+                 temp << *it;
              }
              else
              {
@@ -408,6 +413,21 @@ class BBDocument : public BBNode
         else if (*nameEnd == '=')
         {
             // possibly a QUOTE value element
+            // possibly key-value pairs of a QUOTE
+            ParameterMap pairs;
+            
+            auto kvEnd = parseKeyValuePairs(nameStart, end, pairs);
+            if (pairs.size() == 0)
+            {
+                newText(std::string(begin, kvEnd));
+                return kvEnd;
+            }
+            else
+            {
+                newKeyValueElement(elementName, pairs);
+                // TODO: add 'pairs'
+                return std::next(kvEnd);
+            }
         }
         else if (*nameEnd == ' ')
         {

@@ -90,6 +90,7 @@ public:
     BBNodePtr getParent() const { return BBNodePtr(_parent); }
 
     const BBNodeList& getChildren() const { return _children; }
+    std::string getRawText();
 
     virtual void appendChild(BBNodePtr node)
     {

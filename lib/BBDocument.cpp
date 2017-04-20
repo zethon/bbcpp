@@ -114,5 +114,38 @@ BBElement& BBDocument::newKeyValueElement(const std::string& name, const Paramet
     return *newNode;
 
 }
+    std::string getRawString(const BBNode& parent)
+    {
+        std::string root = "";
+        for (const auto node : parent.getChildren())
+        {
+            switch (node->getNodeType())
+            {
+                default:
+                    break;
+                    
+                case BBNode::ELEMENT:
+                {
+                    const auto element = node->downCast<BBElementPtr>();
+                    
+                    if (element->getElementType() == BBElement::PARAMETER)
+                    {
+                    }
+                }
+                    break;
+                    
+                case BBNode::TEXT:
+                {
+                    const auto textnode = node->downCast<BBTextPtr>();
+                    root += textnode->getText();
+                }
+                    break;
+            }
+            
+            root += getRawString(*node);
+        }
+
+        return root;
+    }
 
 } // namespace

@@ -277,6 +277,13 @@ class BBDocument : public BBNode
                  //is color
                  temp << *it;
              }
+             else if (*it == ':' || *it == '/' || *it == '.' || *it == '&'
+                      || *it == '?' || *it == '$' || *it == '-' || *it == '+'
+                      || *it == '*' || *it == '(' || *it == ')' || *it == ',')
+             {
+                 //is url
+                 temp << *it;
+             }
              else
              {
                  // some invalid character, so return the point where

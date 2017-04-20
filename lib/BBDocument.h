@@ -551,102 +551,12 @@ private:
     BBElement& newKeyValueElement(const std::string& name, const ParameterMap& pairs);
 };
 
-std::string nodeTypeToString(BBNode::NodeType type)
-{
-    std::string retval = "Unknown";
-
-    switch (type)
-    {
-        case BBNode::NodeType::DOCUMENT:
-            retval = "Document";
-        break;
-
-        case BBNode::NodeType::ELEMENT:
-            retval = "Element";
-        break;
-
-        case BBNode::NodeType::TEXT:
-            retval = "Text";
-        break;
-
-        default:
-        break;
-    }
-
-    return retval;
-}
-
-// Helper Functions
-std::string getIndentString(const uint indent)
-{
-    std::stringstream output;
-
-    for (auto i = 0; i < indent; i++)
-    {
-        output << "|   ";
-    }
-
-    output << "|-- ";
-    return output.str();
-}
-
-void printParameters(const ParameterMap& pairs, const uint indent)
-{
-    for (const auto& kv : pairs)
-    {
-        std::cout
-            << getIndentString(indent+1)
-            << "{" << kv.first << "=" << kv.second << "}"
-            << std::endl;
-    }
-}
-
-void printChildren(const BBNode& parent, uint indent)
-{
-    for (const auto node : parent.getChildren())
-    {
-        switch (node->getNodeType())
-        {
-            default:
-            break;
-
-            case BBNode::ELEMENT:
-            {
-                const auto element = node->downCast<BBElementPtr>();
-                std::cout
-                    << getIndentString(indent)
-                    << "["
-                    << (element->getElementType() == BBElement::CLOSING ? "/" : "")
-                    << element->getNodeName() << "]"
-                    << std::endl;
-
-                if (element->getElementType() == BBElement::PARAMETER)
-                {
-                    printParameters(element->getParameters(), indent);
-                }
-            }
-            break;
-
-             case BBNode::TEXT:
-             {
-                const auto textnode = node->downCast<BBTextPtr>();
-                std::cout << getIndentString(indent)
-                    << "@\"" << textnode->getText() << "\""
-                    << std::endl;
-             }
-             break;
-        }
-
-        printChildren(*node, indent+1);
-    }
-}
-
-void printDocument(const BBDocument& doc)
-{
-    std::cout << "#document" << std::endl;
-
-    auto indent = 0u;
-    printChildren(doc, indent);
-}
-
+    std::string nodeTypeToString(BBNode::NodeType type);
+    // Helper Functions
+    std::string getIndentString(const uint indent);
+    void printParameters(const ParameterMap& pairs, const uint indent);
+    void printChildren(const BBNode& parent, uint indent);
+    void printDocument(const BBDocument& doc);
+    std::string getRawString(const BBNode& node);
+    
 } // namespace

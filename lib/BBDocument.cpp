@@ -11,15 +11,13 @@ BBNode::BBNode(NodeType nodeType, const std::string& name)
 
 BBText &BBDocument::newText(const std::string &text)
 {
-#if COCOS2D_DEBUG > 0
-#endif
     // first try to append this text to the item on top of the stack
     // if that is a BBText object, if not, then see if the last element
     // pushed to BBDocument is a text item, and if so append this to that
     // text
     if (_stack.size() > 0 && _stack.top()->getChildren().size() > 0)
     {
-        int totalChildCnt = _stack.top()->getChildren().size();
+        auto totalChildCnt = _stack.top()->getChildren().size();
         auto textnode = _stack.top()->getChildren().at(totalChildCnt - 1)->downCast<BBTextPtr>(false);
         if (textnode)
         {
@@ -56,8 +54,6 @@ BBText &BBDocument::newText(const std::string &text)
 
 BBElement& BBDocument::newElement(const std::string &name)
 {
-#if COCOS2D_DEBUG > 0
-#endif
     auto newNode = std::make_shared<BBElement>(name);
     if (_stack.size() > 0)
     {
@@ -75,8 +71,6 @@ BBElement& BBDocument::newElement(const std::string &name)
 
 BBElement& BBDocument::newClosingElement(const std::string& name)
 {
-#if COCOS2D_DEBUG > 0
-#endif
     auto newNode = std::make_shared<BBElement>(name, BBElement::CLOSING);
     if (_stack.size() > 0)
     {
@@ -93,8 +87,6 @@ BBElement& BBDocument::newClosingElement(const std::string& name)
 
 BBElement& BBDocument::newKeyValueElement(const std::string& name, const ParameterMap& pairs)
 {
-#if COCOS2D_DEBUG > 0
-#endif
     auto newNode = std::make_shared<BBElement>(name, BBElement::PARAMETER);
     if (_stack.size() > 0)
     {
@@ -141,11 +133,11 @@ BBElement& BBDocument::newKeyValueElement(const std::string& name, const Paramet
     }
     
     // Helper Functions
-    std::string getIndentString(const uint indent)
+    std::string getIndentString(const unsigned int indent)
     {
         std::stringstream output;
         
-        for (auto i = 0; i < indent; i++)
+        for (unsigned int i = 0; i < indent; i++)
         {
             output << "|   ";
         }
@@ -154,7 +146,7 @@ BBElement& BBDocument::newKeyValueElement(const std::string& name, const Paramet
         return output.str();
     }
     
-    void printParameters(const ParameterMap& pairs, const uint indent)
+    void printParameters(const ParameterMap& pairs, const unsigned int indent)
     {
 #if COCOS2D_DEBUG > 0
         for (const auto& kv : pairs)
@@ -167,7 +159,7 @@ BBElement& BBDocument::newKeyValueElement(const std::string& name, const Paramet
 #endif
     }
     
-    void printChildren(const BBNode& parent, uint indent)
+    void printChildren(const BBNode& parent, unsigned int indent)
     {
 #if COCOS2D_DEBUG > 0
         for (const auto node : parent.getChildren())
@@ -219,38 +211,38 @@ BBElement& BBDocument::newKeyValueElement(const std::string& name, const Paramet
 #endif
     }
 
-    std::string getRawString(const BBNode& parent)
+std::string getRawString(const BBNode& parent)
+{
+    std::string root = "";
+    for (const auto node : parent.getChildren())
     {
-        std::string root = "";
-        for (const auto node : parent.getChildren())
+        switch (node->getNodeType())
         {
-            switch (node->getNodeType())
+            default:
+                break;
+                    
+            case BBNode::ELEMENT:
             {
-                default:
-                    break;
+                const auto element = node->downCast<BBElementPtr>();
                     
-                case BBNode::ELEMENT:
+                if (element->getElementType() == BBElement::PARAMETER)
                 {
-                    const auto element = node->downCast<BBElementPtr>();
-                    
-                    if (element->getElementType() == BBElement::PARAMETER)
-                    {
-                    }
                 }
-                    break;
-                    
-                case BBNode::TEXT:
-                {
-                    const auto textnode = node->downCast<BBTextPtr>();
-                    root += textnode->getText();
-                }
-                    break;
             }
-            
-            root += getRawString(*node);
+                break;
+                    
+            case BBNode::TEXT:
+            {
+                const auto textnode = node->downCast<BBTextPtr>();
+                root += textnode->getText();
+            }
+                break;
         }
-
-        return root;
+            
+        root += getRawString(*node);
     }
+
+    return root;
+}
 
 } // namespace

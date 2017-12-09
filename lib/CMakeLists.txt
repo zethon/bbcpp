@@ -3,6 +3,7 @@ set(SOURCE_FILES
 )
 
 set(HEADER_FILES
+    bbcpputils.h
     BBDocument.h
 )
 

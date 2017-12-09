@@ -8,6 +8,8 @@
 #include <iostream>
 #include <map>
 
+#include "bbcpputils.h"
+
 namespace bbcpp
 {
 
@@ -225,7 +227,7 @@ class BBDocument : public BBNode
          for (auto it = start; it != end; it++)
          {
              // TODO: alphanumeric names only?
-            if (std::isalnum(*it) != 0)
+            if (bbcpp::IsAlpha((char)*it) || bbcpp::IsDigit((char)*it))
             {
                 str << *it;
             }
@@ -301,7 +303,7 @@ class BBDocument : public BBNode
     citerator parseKey(citerator begin, citerator end, std::string& keyname)
     {
         auto start = begin;
-        while (std::isspace(*start) && start != end)
+        while (bbcpp::IsSpace(*start) && start != end)
         {
             start++;
         }
@@ -558,12 +560,17 @@ private:
     BBElement& newKeyValueElement(const std::string& name, const ParameterMap& pairs);
 };
 
-    std::string nodeTypeToString(BBNode::NodeType type);
-    // Helper Functions
-    std::string getIndentString(const uint indent);
-    void printParameters(const ParameterMap& pairs, const uint indent);
-    void printChildren(const BBNode& parent, uint indent);
-    void printDocument(const BBDocument& doc);
-    std::string getRawString(const BBNode& node);
+//namespace std
+//{
+//std::ostream& operator<<(std::ostream&, const 
+//}
+
+// Helper Functions
+std::string nodeTypeToString(BBNode::NodeType type);
+std::string getIndentString(const unsigned int indent);
+void printParameters(const ParameterMap& pairs, const unsigned int indent);
+void printChildren(const BBNode& parent, unsigned int indent);
+void printDocument(const BBDocument& doc);
+std::string getRawString(const BBNode& node);
     
 } // namespace

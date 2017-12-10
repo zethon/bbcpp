@@ -91,31 +91,30 @@ TEST(simpletests, brokenElements)
    EXPECT_EQ(textnode->getText(), "This [] is[bbb");
 }
 
-TEST(simpletests, parameters)
+TEST(simpletests, singleparameter)
 {
-//    BBDocumentPtr doc  = createDoc("This [] is[bbb][[this is s[[[cool and a [b]test[/b] ok? [][");
-//    BBDocumentPtr doc  = createDoc("[this is s[");
-//    printDocument(*doc);
+    const std::vector<std::string> strings = 
+    {
+        "This is [style color=red]WARNING[/style]",
+        "This is [style color =red]red[/color]",
+        "This is [style color= red]red[/color]",
+        "This is [style color = red]red[/color]",
+        "This is [style color=red ]red[/color]"
+    };
 
-//    BBDocumentPtr doc  = createDoc("This is [style color=red size=large]red[/color]");
+    for (auto& text : strings)
+    {
+        SCOPED_TRACE("Test Text: " + text);
+        BBDocumentPtr doc  = createDoc(text);
+        BBNodeList children = doc->getChildren();
+        EXPECT_EQ(children.size(), 2);
 
-    // "This is [style color=red]red[/color]"
-    // "This is [style color =red]red[/color]"
-    // "This is [style color= red]red[/color]"
-    // "This is [style color = red]red[/color]"
-    // "This is [style color=red ]red[/color]"
-    BBDocumentPtr doc  = createDoc("This is [style color=red]WARNING[/style]");
+        BBElementPtr el = children.at(1)->downCast<BBElementPtr>(false);
+        EXPECT_NE(el, nullptr);
 
-    BBNodeList children = doc->getChildren();
-    EXPECT_EQ(children.size(), 2);
-
-    BBElementPtr el = children.at(1)->downCast<BBElementPtr>(false);
-    EXPECT_NE(el, nullptr);
-
-    const ParameterMap& pairs = el->getParameters();
-    EXPECT_EQ(pairs.size(), 1);
-    EXPECT_NE(pairs.find("color"), pairs.end());
-    EXPECT_EQ(pairs.at("color"), "red");
+        const ParameterMap& pairs = el->getParameters();
+        EXPECT_EQ(pairs.size(), 1);
+        EXPECT_NE(pairs.find("color"), pairs.end());
+        EXPECT_EQ(pairs.at("color"), "red");        
+    }
 }
-
-

@@ -4,12 +4,14 @@
 
 bbcpp is a C++ library for parsing BBCode, or Bulletin Board Code, a markup language used to format posts in many message boards.
 
-This library primarily focuses on parsing the BBCode into a tree data structure that can be used for formatted output. This library does not include any output classes, though a basic HTML output class will likely be included. 
+This library parses BBCode into a tree data structure that can be used to format output. However, this library does not include any output classes, though a basic HTML output class will likely be included. 
 
 ## Usage
 
-    auto doc = BBDocument::create();
-    doc->load("This is [b]an example[/b] of some text.");
+```cpp
+auto doc = BBDocument::create();
+doc->load("This is [b]an example[/b] of some text.");
+```
 
 ## Simple Elements
 

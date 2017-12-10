@@ -14,6 +14,22 @@
 namespace bbcpp
 {
 
+inline bool IsDigit(char c)
+{
+    return ('0' <= c && c <= '9');
+}
+
+inline bool IsAlpha(char c)
+{
+    static const char alpha[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return (std::strchr(alpha, c) != nullptr);
+}
+
+inline bool IsSpace(char c)
+{
+    return std::isspace(static_cast<unsigned char>(c)) != 0;
+}
+
 class BBNode;
 class BBText;
 class BBElement;
@@ -581,12 +597,6 @@ std::ostream& operator<<(std::ostream& os, const ParameterMap& params)
 
 }
 
-// Helper Functions
-std::string nodeTypeToString(BBNode::NodeType type);
-std::string getIndentString(const unsigned int indent);
-void printParameters(const ParameterMap& pairs, const unsigned int indent);
-void printChildren(const BBNode& parent, unsigned int indent);
-void printDocument(const BBDocument& doc);
-std::string getRawString(const BBNode& node);
+
     
 } // namespace

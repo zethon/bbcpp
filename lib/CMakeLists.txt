@@ -1,6 +1,7 @@
 project(bbcpplib)
 
-set(SOURCE_FILES 
+set(SOURCE_FILES
+    bbcpputils.cpp
     BBDocument.cpp
 )
 

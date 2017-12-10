@@ -199,7 +199,7 @@ public:
     const ParameterMap& getParameters() const { return _parameters; }
 
 private:
-    ElementType         _elementType = BBElement::SIMPLE;
+    ElementType       _elementType = BBElement::SIMPLE;
     ParameterMap      _parameters;
 };
 

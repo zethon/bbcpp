@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <map>
+#include <iterator>
 
 #include "bbcpputils.h"
 
@@ -560,10 +561,25 @@ private:
     BBElement& newKeyValueElement(const std::string& name, const ParameterMap& pairs);
 };
 
-//namespace std
-//{
-//std::ostream& operator<<(std::ostream&, const 
-//}
+namespace
+{
+
+std::ostream& operator<<(std::ostream& os, const ParameterMap& params)
+{
+    bool first = true;
+    os << "{ ";
+    for (auto& p : params)
+    {
+        os << (first ? "" : ", ") << "{" << p.first << "=" << p.second << "}";
+        if (first)
+        {
+            first = false;
+        }
+    }
+    return (os << " }");
+}
+
+}
 
 // Helper Functions
 std::string nodeTypeToString(BBNode::NodeType type);

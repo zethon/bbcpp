@@ -37,5 +37,5 @@ add_executable(bbcodetests
     main.cpp
     simpletests.cpp)
 
-target_link_libraries(bbcodetests gtest_main bbcppshared)
+target_link_libraries(bbcodetests gtest_main bbcppstatic)
 add_test(NAME main_test COMMAND main)

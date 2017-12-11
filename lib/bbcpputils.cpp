@@ -43,17 +43,6 @@ std::string getIndentString(const unsigned int indent)
     return output.str();
 }
 
-void printParameters(const ParameterMap& pairs, const unsigned int indent)
-{
-    for (const auto& kv : pairs)
-    {
-        std::cout
-        << getIndentString(indent+1)
-        << "{" << kv.first << "=" << kv.second << "}"
-        << std::endl;
-    }
-}
-
 void printChildren(const BBNode& parent, unsigned int indent)
 {
     for (const auto node : parent.getChildren())
@@ -75,7 +64,10 @@ void printChildren(const BBNode& parent, unsigned int indent)
                 
                 if (element->getElementType() == BBElement::PARAMETER)
                 {
-                    printParameters(element->getParameters(), indent);
+                    std::cout 
+                        << getIndentString(indent + 1)
+                        << element->getParameters()
+                        << std::endl;
                 }
             }
                 break;

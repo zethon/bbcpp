@@ -4,6 +4,7 @@
 
 #include "cxxopts.hpp"
 #include "../lib/BBDocument.h"
+#include "../lib/bbcpputils.h"
 
 using namespace bbcpp;
 

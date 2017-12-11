@@ -8,8 +8,7 @@
 #include <iostream>
 #include <map>
 #include <iterator>
-
-#include "bbcpputils.h"
+#include <cctype>
 
 namespace bbcpp
 {

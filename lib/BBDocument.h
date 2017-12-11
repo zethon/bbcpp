@@ -274,7 +274,6 @@ class BBDocument : public BBNode
              return end;
          }
 
-         bool closedParams = false;
          std::stringstream temp;
 
          // TODO: need to handle spaces after the key name and before

@@ -11,6 +11,27 @@ if (UNIX)
     endif (APPLE)
 endif (UNIX)
 
+if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    add_compile_options(
+        -Werror=sign-compare
+        -Werror=unused-macros
+#        -Werror=unused-function
+        -Werror=unused-label
+        -Werror=unused-value
+        -Werror=unused-variable
+        -Werror=empty-body
+        -Werror=uninitialized
+    )
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    add_compile_options(
+        -Werror=bool-conversion
+        -Werror=enum-conversion
+        -Werror=tautological-compare
+    )
+endif()
+
 if (NOT LIB_INSTALL_DIR)
     set (LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 endif (NOT LIB_INSTALL_DIR)

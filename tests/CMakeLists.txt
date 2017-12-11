@@ -35,7 +35,8 @@ endif()
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(bbcodetests
     main.cpp
-    simpletests.cpp)
+    simpletests.cpp
+    utiltests.cpp)
 
 target_link_libraries(bbcodetests gtest_main bbcppstatic)
 add_test(NAME main_test COMMAND main)

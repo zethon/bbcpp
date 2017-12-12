@@ -5,15 +5,14 @@ sudo: false
 
 matrix:
   include:
-  os:
-    - linux
+    - os: linux
       addons:
         apt:
           source:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-    - osx
+    - os: osx
       osx_image: xcode8
 
 script:

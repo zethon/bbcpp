@@ -1,19 +1,10 @@
-# On OSX using clang, on Linux use GCC
-
 language: cpp
-sudo: required
+sudo: false
 
 matrix:
   include:
-    - os: linux
-      addons:
-        apt:
-          source:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
 
 script:
   - cmake .

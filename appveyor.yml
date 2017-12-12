@@ -1,30 +1,31 @@
-environment:
-  matrix:
-    # - GENERATOR: "Visual Studio 12"
-    #   CONFIG: Debug
+# environment:
+#   matrix:
+#     # - GENERATOR: "Visual Studio 12"
+#     #   CONFIG: Debug
 
-    # - GENERATOR: "Visual Studio 12"
-    #   CONFIG: Release
+#     # - GENERATOR: "Visual Studio 12"
+#     #   CONFIG: Release
 
-    - GENERATOR: "Visual Studio 15 Win64"
-      CONFIG: Debug
+#     - GENERATOR: "Visual Studio 15 Win64"
+#       CONFIG: Debug
 
-    - GENERATOR: "Visual Studio 15 Win64"
-      CONFIG: Release
+#     - GENERATOR: "Visual Studio 15 Win64"
+#       CONFIG: Release
 
-build_script:
-  - cmake "-G%GENERATOR%" -H. -B_builds
-  - cmake --build _builds --config "%CONFIG%"
+# build_script:
+#   - cmake "-G%GENERATOR%" -H. -B_builds
+#   - cmake --build _builds --config "%CONFIG%"
 
 
-# image:
-#   - Visual Studio 2017
+image:
+  - Visual Studio 2017
 
 # clone_folder: c:\projects\bbcpp
 
-# build_script:
-# - cmd: >-
-#     mkdir build
-#     cd build
-#     cmake c:\projects\bbcpp -G "Visual Studio 15"
-#     cmake --build . --config "Debug"
+build_script:
+  - cmake "-GVisual Studio 15" -H. -B_builds
+  - cmake --build _builds --config "Debug"
+    # mkdir build
+    # cd build
+    # cmake c:\projects\bbcpp -G "Visual Studio 15"
+    # cmake --build . --config "Debug"

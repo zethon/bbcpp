@@ -52,7 +52,7 @@ void printChildren(const BBNode& parent, unsigned int indent)
             default:
                 break;
                 
-            case BBNode::ELEMENT:
+            case BBNode::NodeType::ELEMENT:
             {
                 const auto element = node->downCast<BBElementPtr>();
                 std::cout
@@ -72,7 +72,7 @@ void printChildren(const BBNode& parent, unsigned int indent)
             }
                 break;
                 
-            case BBNode::TEXT:
+            case BBNode::NodeType::TEXT:
             {
                 const auto textnode = node->downCast<BBTextPtr>();
                 std::cout << getIndentString(indent)
@@ -104,7 +104,7 @@ std::string getRawString(const BBNode& parent)
             default:
                 break;
                     
-            case BBNode::ELEMENT:
+            case BBNode::NodeType::ELEMENT:
             {
                 const auto element = node->downCast<BBElementPtr>();
                     
@@ -114,7 +114,7 @@ std::string getRawString(const BBNode& parent)
             }
                 break;
                     
-            case BBNode::TEXT:
+            case BBNode::NodeType::TEXT:
             {
                 const auto textnode = node->downCast<BBTextPtr>();
                 root += textnode->getText();

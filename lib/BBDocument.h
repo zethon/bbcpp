@@ -97,7 +97,7 @@ class BBNode : public std::enable_shared_from_this<BBNode>
     }      
         
 public:
-    enum NodeType
+    enum class NodeType
     {
         DOCUMENT,   
         ELEMENT,    // [b]bold[/b], [QUOTE], [QUOTE=Username;1234], [QUOTE user=Bob] 
@@ -113,7 +113,6 @@ public:
     BBNodePtr getParent() const { return BBNodePtr(_parent); }
 
     const BBNodeList& getChildren() const { return _children; }
-    std::string getRawText();
 
     virtual void appendChild(BBNodePtr node)
     {
@@ -148,7 +147,7 @@ class BBText : public BBNode
 {
 public:
     BBText(const std::string& value)
-        : BBNode(BBNode::TEXT, value)
+        : BBNode(BBNode::NodeType::TEXT, value)
     {
         // nothing to do
     }
@@ -175,7 +174,7 @@ public:
     };
 
     BBElement(const std::string& name, ElementType et = BBElement::SIMPLE)
-        : BBNode(BBNode::ELEMENT, name),
+        : BBNode(BBNode::NodeType::ELEMENT, name),
           _elementType(et)
     {
         // nothing to do
@@ -210,7 +209,7 @@ private:
 class BBDocument : public BBNode
 {
     BBDocument() 
-        : BBNode(DOCUMENT, "#document")
+        : BBNode(BBNode::NodeType::DOCUMENT, "#document")
     {
         // nothing to do
     }
@@ -515,7 +514,7 @@ public:
         std::string buffer;
         auto bUnknownNodeType = true;
         auto current = begin;
-        auto nodeType = BBNode::TEXT;
+        auto nodeType = BBNode::NodeType::TEXT;
 
         Iterator temp;
 
@@ -525,12 +524,12 @@ public:
             {
                 if (*current == '[')
                 {
-                    nodeType = BBNode::ELEMENT;
+                    nodeType = BBNode::NodeType::ELEMENT;
                     bUnknownNodeType = false;
                 }
                 else
                 {
-                    nodeType = BBNode::TEXT;
+                    nodeType = BBNode::NodeType::TEXT;
                     bUnknownNodeType = false;
                 }
             }
@@ -543,20 +542,20 @@ public:
                         throw std::runtime_error("Unknown node type in BBDocument::load()");
                     break;
 
-                    case BBNode::TEXT:
+                    case BBNode::NodeType::TEXT:
                     {
                         current = parseText(current, end);
                         bUnknownNodeType = true;
                     }
                     break;
 
-                    case BBNode::ELEMENT:
+                    case BBNode::NodeType::ELEMENT:
                     {
                         temp  = parseElement(current, end);
                         if (temp == current)
                         {
                             // nothing was parsed, treat as text
-                            nodeType = BBNode::TEXT;
+                            nodeType = BBNode::NodeType::TEXT;
                             bUnknownNodeType = false;
                         }
                         else

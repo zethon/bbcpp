@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
+
 #include "../lib/BBDocument.h"
+#include "../lib/bbcpputils.h"
 
 using namespace bbcpp;
 
@@ -93,13 +95,13 @@ TEST(simpletests, brokenElements)
 
 TEST(simpletests, singleparameter)
 {
-    const std::vector<std::string> strings = 
+    const std::vector<std::string> strings =
     {
         "This is [style color=red]WARNING[/style]",
-        "This is [style color =red]red[/color]",
-        "This is [style color= red]red[/color]",
-        "This is [style color = red]red[/color]",
-        "This is [style color=red ]red[/color]"
+//        "This is [style color =red]red[/color]",
+//        "This is [style color= red]red[/color]",
+//        "This is [style color = red]red[/color]",
+//        "This is [style color=red ]red[/color]"
     };
 
     for (auto& text : strings)
@@ -115,6 +117,36 @@ TEST(simpletests, singleparameter)
         const ParameterMap& pairs = el->getParameters();
         EXPECT_EQ(pairs.size(), 1);
         EXPECT_NE(pairs.find("color"), pairs.end());
-        EXPECT_EQ(pairs.at("color"), "red");        
+        EXPECT_EQ(pairs.at("color"), "red");
     }
 }
+
+TEST(simpletests, nestedElements)
+{
+    const std::string test1 = "This is [b][i][u]OK![/u][/i][/b]!!";
+    auto doc  = createDoc(test1);
+
+    BBNodeList children = doc->getChildren();
+    EXPECT_EQ(children.size(), 3);
+
+    BBNodePtr bNode = children.at(1);
+    EXPECT_EQ(bNode->getChildren().size(),2);
+    EXPECT_EQ(bNode->getNodeName(), "b");
+
+    BBNodePtr iNode = bNode->getChildren().at(0);
+    EXPECT_EQ(iNode->getChildren().size(), 2);
+    EXPECT_EQ(iNode->getNodeName(), "i");
+
+    BBNodePtr uNode = iNode->getChildren().at(0);
+    EXPECT_EQ(uNode->getChildren().size(), 2);
+    EXPECT_EQ(uNode->getNodeName(), "u");
+
+    BBNodePtr tNode = uNode->getChildren().at(0);
+    EXPECT_EQ(tNode->getNodeType(), BBNode::NodeType::TEXT);
+
+    BBTextPtr textNode = tNode->downCast<BBTextPtr>(false);
+    ASSERT_NE(textNode, nullptr);
+    EXPECT_EQ(textNode->getText(), "OK!");
+}
+
+

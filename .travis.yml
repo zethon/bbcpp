@@ -1,21 +1,21 @@
-dist: trusty
-sudo: false
+# On OSX using clang, on Linux use GCC
+
 language: cpp
+sudo: false
 
-os:
-  - linux
-    addons:
-      apt:
-        source:
-          - ubuntu-toolchain-r-test
-        packages:
-          - g++-5
-  - osx
-    osx_image: xcode8
-
-compiler:
-  - gcc
-  - clang
+matrix:
+  include:
+  os:
+    - linux
+      dist: trusty
+      addons:
+        apt:
+          source:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+    - osx
+      osx_image: xcode8
 
 script:
   - cmake .

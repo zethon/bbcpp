@@ -9,6 +9,7 @@
 #include <map>
 #include <iterator>
 #include <cctype>
+#include <cstring>
 
 namespace bbcpp
 {

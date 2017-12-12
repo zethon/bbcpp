@@ -11,6 +11,7 @@ os:
         packages:
           - g++-5
   - osx
+    osx_image: xcode8
 
 compiler:
   - gcc

@@ -1,7 +1,7 @@
 # On OSX using clang, on Linux use GCC
 
 language: cpp
-sudo: false
+sudo: required
 
 matrix:
   include:

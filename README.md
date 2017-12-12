@@ -1,5 +1,9 @@
 # bbcpp
 
+[![Build Status][travis-img]][travis]
+[![Build Status][appveyor-img]][appveyor]
+
+
 ## Introduction
 
 bbcpp is a C++ library for parsing BBCode, or Bulletin Board Code, a markup language used to format posts in many message boards.
@@ -94,3 +98,8 @@ The following are examples of the node tree built during parsing.
 │   │-- [/QUOTE]
 │-- @"\n\nI'm quoting you!"
 ```
+[travis-img]: https://travis-ci.org/zethon/bbcpp.svg?branch=master
+[travis]: https://travis-ci.org/zethon/bbcpp
+
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/i7p4q2d0vvoyv8aq?svg=true
+[appveyor]: https://ci.appveyor.com/project/zethon/bbcpp

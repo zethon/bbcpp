@@ -24,6 +24,11 @@ inline bool IsAlpha(char c)
     return (std::strchr(alpha, c) != nullptr);
 }
 
+inline bool IsAlNum(char c)
+{
+    return IsAlpha(c) || IsDigit(c);
+}
+
 inline bool IsSpace(char c)
 {
     return std::isspace(static_cast<unsigned char>(c)) != 0;
@@ -243,7 +248,7 @@ class BBDocument : public BBNode
          for (auto it = start; it != end; it++)
          {
              // TODO: alphanumeric names only?
-            if (bbcpp::IsAlpha((char)*it) || bbcpp::IsDigit((char)*it))
+            if (bbcpp::IsAlNum((char)*it))
             {
                 str << *it;
             }
@@ -261,7 +266,7 @@ class BBDocument : public BBNode
      citerator parseValue(citerator begin, citerator end, std::string& value)
      {
          auto start = begin;
-         while (std::isspace(*start) && start != end)
+         while (bbcpp::IsSpace(*start) && start != end)
          {
              start++;
          }
@@ -276,11 +281,9 @@ class BBDocument : public BBNode
 
          std::stringstream temp;
 
-         // TODO: need to handle spaces after the key name and before
-         // the equal sign (ie. "[style color  =red]")
          for (auto it = start; it != end; it++)
          {
-             if (std::isalnum(*it))
+             if (bbcpp::IsAlNum(*it))
              {
                  temp << *it;
              }
@@ -337,7 +340,7 @@ class BBDocument : public BBNode
         // the equal sign (ie. "[style color  =red]")
         for (auto it = start; it != end; it++)
         {
-            if (std::isalnum(*it))
+            if (bbcpp::IsAlNum(*it))
             {
                 temp << *it;
             }
@@ -377,7 +380,8 @@ class BBDocument : public BBNode
 
             if (*current != '=')
             {
-                throw std::logic_error("WTF?!?!");
+                pairs.clear();
+                return current;
             }
 
             current = std::next(current);
@@ -392,6 +396,8 @@ class BBDocument : public BBNode
             pairs.insert(std::make_pair(tempKey, tempVal));
             if (*current == ']')
             {
+                // this is the only valid condition for key/value pairs so we do
+                // not want to clear `pairs` like in the other cases
                 return current;
             }
         }
@@ -416,7 +422,6 @@ class BBDocument : public BBNode
             nameStart = std::next(nameStart);
         }
 
-        // nameEnd will point
         auto nameEnd = parseElementName(nameStart, end, elementName);
 
         // no valid name was found, so bail out

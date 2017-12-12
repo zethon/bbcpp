@@ -4,6 +4,12 @@ language: cpp
 
 os:
   - linux
+    addons:
+      apt:
+        source:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-5
   - osx
 
 compiler:

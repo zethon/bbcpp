@@ -13,7 +13,7 @@ auto doc = BBDocument::create();
 doc->load("This is [b]an example[/b] of some text.");
 ```
 
-## Simple Elements
+## Element Types
 
 #### Examples:
     [B] - Bold text

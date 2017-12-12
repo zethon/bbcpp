@@ -1,3 +1,14 @@
+dist: trusty
+sudo: false
+language: cpp
+
 script:
   - cmake .
-  - cmake --build. -- -j2
+  - cmake --build . -- -j2
+
+notifactions:
+  email:
+    recipients:
+      - aclaure@gmail.com
+    on_suucess: never
+    on_failre: always

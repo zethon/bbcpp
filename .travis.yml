@@ -1,8 +1,18 @@
 language: cpp
-sudo: false
+
+addons:
+  apt:
+    sources: 
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.9
 
 matrix:
   include:
+    - os: linux
+      sudo: false
+      env: GCC_VER="4.9"
+      compiler: gcc
     - os: osx
       osx_image: xcode8.3
 

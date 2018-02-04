@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "cxxopts.hpp"
+#include "../lib/BBSpirit.h"
 #include "../lib/BBDocument.h"
 #include "../lib/bbcpputils.h"
 
@@ -21,6 +22,11 @@ std::string readFile(const std::string& filename)
     return std::string();
 }
 
+void doSpiritParse(const std::string& text)
+{
+    std::cout << "spirit parse" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
     cxxopts::Options options(argv[0], " - example command line options");
@@ -29,9 +35,12 @@ int main(int argc, char* argv[])
         .show_positional_help();
 
     options.add_options()
-        ("f, file", "File", cxxopts::value<std::string>());
+        ("f, file", "File", cxxopts::value<std::string>())
+        ("s", "Spirit Parsing")
+    ;
 
     std::string inputfile;
+    bool spiritParse = false;
 
     try
     {
@@ -40,6 +49,8 @@ int main(int argc, char* argv[])
         {
             inputfile = result["file"].as<std::string>();
         }
+
+        spiritParse = result["s"].as<bool>();
     }
     catch (const cxxopts::OptionException& e)
     {
@@ -53,10 +64,16 @@ int main(int argc, char* argv[])
         std::cout << "file: " << inputfile << std::endl;
         std::cout << "bbcode: " << filetext << std::endl;
 
-        auto doc = BBDocument::create();
-        doc->load(filetext);
-        
-        printDocument(*doc);
+        if (spiritParse)
+        {
+            doSpiritParse(filetext);
+        }
+        else
+        {
+            auto doc = BBDocument::create();
+            doc->load(filetext);
+            printDocument(*doc);
+        }
     }
     else
     {

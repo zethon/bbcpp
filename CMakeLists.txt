@@ -36,6 +36,9 @@ if (NOT LIB_INSTALL_DIR)
     set (LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 endif (NOT LIB_INSTALL_DIR)
 
+find_package(Boost)
+include_directories(${Boost_INCLUDE_DIRS})
+
 add_subdirectory(lib)
 add_subdirectory(examples)
 

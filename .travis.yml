@@ -20,6 +20,9 @@ script:
   - cmake .
   - cmake --build . -- -j2
 
+after_success:
+  - ctest -VV -C "Debug"
+
 notifactions:
   email:
     recipients:

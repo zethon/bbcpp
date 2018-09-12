@@ -6,10 +6,12 @@
 
 BOOST_AUTO_TEST_SUITE(basic)
 
-BOOST_AUTO_TEST_CASE(baseConstructor)
+BOOST_AUTO_TEST_CASE(constructionTest)
 {
+    using namespace bbcpp;
 
-
+    BBNode node { BBNode::NodeType::ELEMENT, "QUOTE" };
+    BOOST_TEST(node.getNodeName() == "QUOTE");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

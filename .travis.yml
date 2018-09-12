@@ -1,17 +1,22 @@
 language: cpp
 
+# need to install the Boost libraries to the sandbox
+before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install libboost-thread-dev libboost-system-dev libboost-test-dev
+
 addons:
   apt:
     sources: 
       - ubuntu-toolchain-r-test
     packages:
-      - g++-4.9
+      - g++-6
 
 matrix:
   include:
     - os: linux
       sudo: false
-      env: GCC_VER="4.9" BOOST_VERSION=default
+      env: MATRIX_EVAL="CC=gcc-6 && CXX=g++-6" BOOST_VERSION=default
       compiler: gcc
     - os: osx
       osx_image: xcode8.3

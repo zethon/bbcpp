@@ -2,7 +2,7 @@ image:
   - Visual Studio 2017
 
 environment:
-  BOOST_ROOT: C:\Libraries\boost_1_66_0
+  BOOST_ROOT: C:\Libraries\boost_1_67_0
 
 build_script:
   - cmake "-GVisual Studio 15" -H. -B_builds
@@ -10,6 +10,7 @@ build_script:
   
 test_script:
   - ps: cd _builds
-  - set PATH=%PATH%;C:\Libraries\boost_1_66_0\lib64-msvc-14.1;
+  - set PATH=%PATH%;C:\Libraries\boost_1_67_0\lib64-msvc-14.1;
   - echo %PATH%
+  - dir /s C:\Libraries\boost_1_67_0
   - ctest -VV -C "Debug"

@@ -11,7 +11,7 @@ matrix:
   include:
     - os: linux
       sudo: false
-      env: GCC_VER="4.9"
+      env: GCC_VER="4.9" BOOST_VERSION=default
       compiler: gcc
     - os: osx
       osx_image: xcode8.3

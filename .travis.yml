@@ -2,8 +2,8 @@ language: cpp
 
 # need to install the Boost libraries to the sandbox
 before_script:
-  - sudo apt-get update -qq
-  - sudo apt-get install libboost-thread-dev libboost-system-dev libboost-test-dev
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -qq; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sudo apt-get install libboost-thread-dev libboost-system-dev libboost-test-dev; fi
 
 addons:
   apt:
